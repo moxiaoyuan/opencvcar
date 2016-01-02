@@ -1,0 +1,27 @@
+#include "stdafx.h"
+#include<opencv2\opencv.hpp>
+#include <opencv2/core/core.hpp> 
+#include<iostream>
+#include<opencv2/nonfree/features2d.hpp>
+#include<opencv2/nonfree/nonfree.hpp>
+#include<opencv2/opencv.hpp>
+using namespace std;
+using namespace cv;  
+int main()
+{
+	Mat M=imread("1.jpg");
+	cvtColor(M,M,CV_BGR2GRAY);
+	Mat contours;
+	Canny(M,contours,125,350);
+	threshold(contours,contours,125,255,THRESH_BINARY);
+	namedWindow("Àƒ¥Á’’");
+	imshow("Àƒ¥Á’’",contours);
+	/*if(img.empty())
+	{
+		cout<<"error";
+		return -1;
+	}
+	imshow("Àƒ¥Á’’",img);*/
+	waitKey();
+	return 0;
+}
