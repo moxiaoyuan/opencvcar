@@ -2,12 +2,12 @@
 #include <opencv2/core/core.hpp> 
 #include<iostream>
 #include<opencv2/nonfree/features2d.hpp>
+#include<opencv2/imgproc/imgproc.hpp>
+#include<opencv2/highgui/highgui.hpp>
 #include<opencv2/nonfree/nonfree.hpp>
 #include<opencv2/opencv.hpp>
 #include"cv.h"
 #include"cxcore.h"
-
-
 using namespace std;
 using namespace cv; 
 
@@ -69,86 +69,12 @@ int myOtsu(IplImage *frame)
     return threshold;
 }
 
+
 int main()
 {
-	/*
-	char*path = "f:\\1111.jpg";
-	IplImage*frame = cvLoadImage(path);
-	if(!frame)return 0;
-	cvNamedWindow("frame",1);
-	cvShowImage("frame",frame);
-    //均值滤波
-	cvSmooth(frame,frame,CV_MEDIAN);
-	//灰度图
-	IplImage*gray=cvCreateImage(cvGetSize(frame),frame->depth,1);
-	cvCvtColor(frame,gray,CV_BGR2GRAY);
-	cvNamedWindow("gray",1);
-	cvShowImage("gray",gray);
-	//边缘检测
-	IplImage*temp=cvCreateImage(cvGetSize(gray),IPL_DEPTH_16S,1);
-	//x方向梯度，垂直边缘
-	cvSobel(gray,temp,2,0,3);
-	IplImage*sobel=cvCreateImage(cvGetSize(temp),IPL_DEPTH_8U,1);
-	cvConvertScale(temp,sobel,1,0);
-	cvShowImage("sobel",sobel);
-	//二值化
-	IplImage*threshold=cvCreateImage(cvGetSize(sobel),gray->depth,1);
-	cvThreshold(sobel,threshold,0,255,CV_THRESH_BINARY|CV_THRESH_OTSU);
-	cvNamedWindow("threshold",1);
-	cvShowImage("threshold",threshold);
-	//形态学变化
-	IplConvKernel*kernal;
-	IplImage*morph=cvCreateImage(cvGetSize(threshold),threshold->depth,1);
-	//自定义1*3的核进行x方向的膨胀腐蚀
-	kernal=cvCreateStructuringElementEx(3,1,1,0,CV_SHAPE_RECT);
-	cvDilate(threshold,morph,kernal,2);//x膨胀联通数字
-	cvErode(morph,morph,kernal,4);//x腐蚀去除碎片
-	cvDilate(morph,morph,kernal,4);//x膨胀回复形态
-	//自定义3*1的核进行y方向的膨胀腐蚀
-	kernal=cvCreateStructuringElementEx(1,3,0,1,CV_SHAPE_RECT);
-	cvErode(morph,morph,kernal,1);//y腐蚀去除碎片
-	cvDilate(morph,morph,kernal,3);//y膨胀回复形态
-	cvNamedWindow("erode",1);
-	cvShowImage("erode",morph);
-	//轮廓检测
-	IplImage * frame_draw = cvCreateImage(cvGetSize(frame), frame->depth, frame->nChannels);
-    cvCopy(frame, frame_draw);
-    CvMemStorage * storage = cvCreateMemStorage(0);  
-    CvSeq * contour = 0;   
-    int count = cvFindContours(morph,storage,&contour,sizeof(CvContour),CV_RETR_CCOMP,CV_CHAIN_APPROX_SIMPLE);   
-    CvSeq * _contour = contour;   
-    for( ;contour != 0; contour = contour->h_next)
-    {  		
-	    double tmparea = fabs(cvContourArea(contour));  		 
-	    CvRect aRect = cvBoundingRect( contour, 0 ); 
-	    if(tmparea > ((frame->height*frame->width)/10))   
-	    {  
-		    cvSeqRemove(contour,0); //删除面积小于设定值的轮廓,1/10   
-		    continue;  
-	    } 
-	    if (aRect.width < (aRect.height*2))  
-	    {  
-		    cvSeqRemove(contour,0); //删除宽高比例小于设定值的轮廓   
-		    continue;  
-	    }
-	    if ((aRect.width/aRect.height) > 4 )
-	    {  
-		    cvSeqRemove(contour,0); //删除宽高比例小于设定值的轮廓   
-		    continue;  
-	    }
-	    if((aRect.height * aRect.width) < ((frame->height * frame->width)/100))
-	    {  
-		    cvSeqRemove(contour,0); //删除宽高比例小于设定值的轮廓   
-		    continue;  
-	    }
-	    CvScalar color = CV_RGB( 255, 0, 0); 
-	    cvDrawContours(frame_draw, contour, color, color, 0, 1, 8 );//绘制外部和内部的轮廓
-    }
-    cvNamedWindow("轮廓", 1);
-    cvShowImage("轮廓", frame_draw);
-	waitKey();*/
 	//图像预处理（根据颜色特征）
-	char*path = "f:\\111.jpg";
+	//HSV是根据颜色的直观性创建的一种颜色空间，H是色调，S是饱和度，V是亮度。
+	char*path = "009.jpg";
 	IplImage*SrcImage = cvLoadImage(path);
 	if(!SrcImage)return 0;
     IplImage *imgH=NULL,*imgS=NULL,*imgV=NULL,*imgHSV=NULL,*imgGray=NULL;
@@ -174,8 +100,9 @@ int main()
     element = cvCreateStructuringElementEx(cols,rows,anchor_x,anchor_y,CV_SHAPE_CUSTOM,values); 
     cvDilate(imgHsvBinnary,imgHsvBinnary,element,1);    //膨胀腐蚀
     cvErode(imgHsvBinnary,imgHsvBinnary,element,2);     //多次腐蚀（2次），消除噪声
-    //cvNamedWindow("imgh1");
-    //cvShowImage("imgh1",imgHsvBinnary);
+    cvNamedWindow("imgh1");
+    cvShowImage("imgh1",imgHsvBinnary);
+
     //阈值分割
     imgGray=cvCreateImage(cvGetSize(SrcImage),SrcImage->depth,1);
     cvCvtColor(SrcImage,imgGray,CV_RGB2GRAY);   //将原图转为单通道的灰色图像
@@ -183,12 +110,12 @@ int main()
     imgRgbBinnary=cvCreateImage(cvGetSize(SrcImage),SrcImage->depth,1);
     int Thresold=myOtsu(imgGray);   //利用大津法求灰色图像阈值
     cvThreshold(imgGray,imgRgbBinnary,Thresold,255,CV_THRESH_OTSU); //利用大津阈值进行二值化
-	//cvThreshold(imgGray,imgRgbBinnary,0,255,CV_THRESH_OTSU); //利用大津阈值进行二值化
-    //cvNamedWindow("imgh2");
-    //cvShowImage("imgh2",imgRgbBinnary);     //显示二值化图像
-    //车牌定位
+    cvNamedWindow("imgh2");
+    cvShowImage("imgh2",imgRgbBinnary);     //显示二值化图像
+
+	//车牌定位
     //行定位（根据车牌的区域的图像特征进行定位）
-    int hop_num=10; //字符连续跳变次数的阈值
+    int hop_num=8; //字符连续跳变次数的阈值
     int num=0;      //计算跳变的次数
     int begin=0;    //跳变是否开始
     int mark_Row[2]={0},k=0;//第一次标记车牌的开始行与结束行
@@ -281,20 +208,59 @@ int main()
 	IplImage*SrcLicenseimg1;
 	IplImage*SrcLicenseimg2;
     cvSetImageROI(SrcImage,cvRect(mark_col1[0],mark_Row1[1],license_Width,license_Height)); //将车牌区域设置为ROI区域
-    cvSetImageROI(imgRgbBinnary,cvRect(mark_col1[0],mark_Row1[1],license_Width,license_Height));
+	cvSetImageROI(imgRgbBinnary,cvRect(mark_col1[0],mark_Row1[1],license_Width,license_Height));
     cvSetImageROI(imgHsvBinnary,cvRect(mark_col1[0],mark_Row1[1],license_Width,license_Height));
     imgLicense=cvCreateImage(cvGetSize(SrcImage),SrcImage->depth,SrcImage->nChannels);  //用于显示的车牌图片
-    SrcLicenseimg1=cvCreateImage(cvGetSize(imgRgbBinnary),imgRgbBinnary->depth,imgRgbBinnary->nChannels);
+	SrcLicenseimg1=cvCreateImage(cvGetSize(imgRgbBinnary),imgRgbBinnary->depth,imgRgbBinnary->nChannels);
     SrcLicenseimg2=cvCreateImage(cvGetSize(imgHsvBinnary),imgHsvBinnary->depth,imgHsvBinnary->nChannels);
     cvCopy(SrcImage,imgLicense,0);
-    cvCopy(imgRgbBinnary,SrcLicenseimg1,0); //将车牌区域拷贝到相应的图像中
+	cvCopy(imgRgbBinnary,SrcLicenseimg1,0); //将车牌区域拷贝到相应的图像中
     cvCopy(imgHsvBinnary,SrcLicenseimg2,0);
-    //cvNamedWindow("SrcLicenseimg1");  //显示车牌的二值化化图片
+    //cvNamedWindow("SrcLicenseimg1");  //显示车牌的二值化图片
     //cvShowImage("SrcLicenseimg1",SrcLicenseimg1);
     //cvNamedWindow("SrcLicenseimg2");  
     //cvShowImage("SrcLicenseimg2",SrcLicenseimg2);
+	
+	//字符分割
+    Mat imge1=imread("0000",1);
+	Mat imge2=imread("0022");
+	vector<vector<cv::Point> > contours;
+	vector<Vec4i> hierarchy;
+	findContours(imge2, contours, hierarchy,	CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
+	Mat img1;
+	Mat img2;
+	Mat img3;
+	Mat img4;
+	Mat img5; 
+	Mat img6;
+	Mat img7;
+	for(int i=0; i<contours.size();i++)
+	{
+		Rect rect = boundingRect(Mat(contours[i]));
+	    rectangle(imge1, rect.tl(), rect.br(),Scalar(255,0,0));
+    	Mat roi = imge1(rect);
+	    switch(i)
+	    {
+		    case 1:roi.convertTo(img1, roi.type());
+			case 4:roi.convertTo(img2, roi.type());
+			case 5:roi.convertTo(img3, roi.type());
+			case 7:roi.convertTo(img4, roi.type());
+			case 8:roi.convertTo(img5, roi.type());
+			case 9:roi.convertTo(img6, roi.type());
+			case 10:roi.convertTo(img7, roi.type());
+		}
+	}
+	imshow("img1",img1);
+	imshow("img2",img2);
+	imshow("img3",img3);
+	imshow("img4",img4);
+	imshow("img5",img5);
+	imshow("img6",img6);
+	imshow("img7",img7);
+	imshow("contoursImg", imge1);
+
     cvResetImageROI(SrcImage);  //取消ROI设置
-    cvResetImageROI(imgRgbBinnary);
+ 	cvResetImageROI(imgRgbBinnary);
     cvResetImageROI(imgHsvBinnary);
 	cvNamedWindow("license");
     cvShowImage("license",imgLicense);
